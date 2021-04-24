@@ -93,13 +93,7 @@ func (i *IntList) Insert(value int) bool {
 	var a, b *Node
 
 	for !found {
-		a = i.head
-		b = a.loadNext()
-
-		for b != nil && b.value < value {
-			a = b
-			b = a.loadNext()
-		}
+		a, b = i.findPositions(value)
 
 		// 检查待写入值是否已存在
 		if b != nil && b.value == value {
@@ -141,13 +135,7 @@ func (i *IntList) Delete(value int) bool {
 	var a, b *Node
 
 	for !found {
-		a = i.head
-		b = a.loadNext()
-
-		for b != nil && b.value < value {
-			a = b
-			b = a.loadNext()
-		}
+		a, b = i.findPositions(value)
 
 		if b == nil || b.value != value {
 			return false
@@ -208,8 +196,8 @@ func NewInt() *IntList {
 // ~ 私有方法
 
 // 寻找目标值的邻接节点
-// TODO: 一个疑问是如果在Insert/Delete开始出寻找a、b时，调用这个封装了的方法后，为什么go test race就无法通过检查了？
-func (i IntList) findPositions(value int) (a, b *Node) {
+// 这里注意一定要是ptr receiver形式，否则会有data race问题，参考readme中的解释
+func (i *IntList) findPositions(value int) (a, b *Node) {
 	a = i.head
 	b = a.loadNext()
 
